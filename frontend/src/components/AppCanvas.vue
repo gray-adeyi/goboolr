@@ -40,6 +40,9 @@ onMounted(() => {
     canvas.value.onmouseenter = handleCanvasMouseEnterEvent;
     canvas.value.onmousedown = handleCanvasMouseDownEvent;
     canvas.value.onmousemove = handleCanvasMouseMoveEvent;
+    canvas.value.onmouseup = handleCanvasMouseUpEvent;
+    canvas.value.ondblclick = handleCanvasDoubleClickEvent;
+    canvas.value.onwheel = handleCanvasMouseWheelEvent;
   }
 });
 
@@ -836,27 +839,27 @@ function handleCanvasMouseMoveEvent(event: MouseEvent) {
       return false;
     }
   } else if (event.button == 2) {
-    offset.x -= event.movementX / zoom;
-    offset.y += event.movementY / zoom;
+    offset.x -= event.movementX / zoom.value;
+    offset.y += event.movementY / zoom.value;
 
     scrollAnimation.v =
       Math.sqrt(Math.pow(event.movementX, 2) + Math.pow(event.movementY, 2)) /
       zoom;
     scrollAnimation.r = Math.atan2(event.movementX, event.movementY);
 
-    wheelClick = false;
-  } else if (event.which == 3) {
+    wheelClick.value = false;
+  } else if (event.button == 3) {
   }
 }
 
 // TODO: onmouseleave
-c.onmouseup = function (e) {
-  mouse.screen.x = e.x;
-  mouse.screen.y = e.y;
-  mouse.grid.x = Math.round(e.x / zoom + offset.x);
-  mouse.grid.y = Math.round(-e.y / zoom + offset.y);
+function handleCanvasMouseUpEvent(event: MouseEvent) {
+  mouse.screen.x = event.x;
+  mouse.screen.y = event.y;
+  mouse.grid.x = Math.round(event.x / zoom + offset.x);
+  mouse.grid.y = Math.round(-event.y / zoom + offset.y);
 
-  if (e.which == 1) {
+  if (event.which == 1) {
     if (selecting && !selecting.components && !dragging) {
       if (Math.abs(selecting.w) < 0.5 && Math.abs(selecting.h) < 0.5) {
         //selecting = null;
@@ -1253,9 +1256,9 @@ c.onmouseup = function (e) {
         }
       }
       connecting = null;
-    } else if (e.altKey) {
+    } else if (event.altKey) {
       scrollAnimation.animate = true;
-    } else if (e.ctrlKey) {
+    } else if (event.ctrlKey) {
       scrollAnimation.animate = true;
     } else {
       const component = findComponentByPos();
@@ -1263,7 +1266,7 @@ c.onmouseup = function (e) {
         component.onmouseup();
       }
     }
-  } else if (e.which == 2) {
+  } else if (event.which == 2) {
     scrollAnimation.animate = true;
 
     if (wheelClick) {
@@ -1271,41 +1274,42 @@ c.onmouseup = function (e) {
       if (component) select(component.constructor);
     }
 
-    e.preventDefault();
+    event.preventDefault();
     return false;
   }
-};
+}
 
-c.ondblclick = function (e) {
-  mouse.screen.x = e.x;
-  mouse.screen.y = e.y;
-  mouse.grid.x = Math.round(e.x / zoom + offset.x);
-  mouse.grid.y = Math.round(-e.y / zoom + offset.y);
+function handleCanvasDoubleClickEvent(event: MouseEvent) {
+  mouse.screen.x = event.x;
+  mouse.screen.y = event.y;
+  mouse.grid.x = Math.round(event.x / zoom + offset.x);
+  mouse.grid.y = Math.round(-event.y / zoom + offset.y);
 
   const component = findComponentByPos();
-  if (e.which == 1 && component && component.open) {
+  if (event.which == 1 && component && component.open) {
     component.open();
   }
-};
+}
 
 // Zooming
-c.onmousewheel = function (e) {
-  e.preventDefault();
+function handleCanvasMouseWheelEvent(event: MouseEvent) {
+  event.preventDefault();
 
-  mouse.screen.x = e.x;
-  mouse.screen.y = e.y;
-  mouse.grid.x = Math.round(e.x / zoom + offset.x);
-  mouse.grid.y = Math.round(-e.y / zoom + offset.y);
+  mouse.screen.x = event.x;
+  mouse.screen.y = event.y;
+  mouse.grid.x = Math.round(event.x / zoom + offset.x);
+  mouse.grid.y = Math.round(-event.y / zoom + offset.y);
 
   zoomAnimation = Math.min(
     Math.max(
-      zoomAnimation - (zoom / 8) * ((e.deltaX || e.deltaY) > 0 ? 0.5 : -1),
+      zoomAnimation -
+        (zoom / 8) * ((event.deltaX || event.deltaY) > 0 ? 0.5 : -1),
       2
     ),
     300
   );
   return false;
-};
+}
 </script>
 
 <template>

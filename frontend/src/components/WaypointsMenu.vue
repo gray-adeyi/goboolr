@@ -4,14 +4,14 @@ import { WayPoint } from "../types";
 
 const wayPointText = ref("");
 const waypointsMenuIsVisible = ref(false);
-let waypoints: WayPoint[] = [];
+let waypoints = ref<WayPoint[]>([]);
 
 function setWaypoint(
   x: number,
   y: number,
-  label = `Waypoint#${waypoints.length}`
+  label = `Waypoint#${waypoints.value.length}`
 ) {
-  waypoints.push({
+  waypoints.value.push({
     x,
     y,
     label,
@@ -20,8 +20,11 @@ function setWaypoint(
 }
 
 function gotoWaypoint(index: number) {
-  if (!waypoints[index]) return;
-  scroll(waypoints[index].x - mouse.grid.x, waypoints[index].y - mouse.grid.y);
+  if (!waypoints.value[index]) return;
+  scroll(
+    waypoints.value[index].x - mouse.grid.x,
+    waypoints[index].y - mouse.grid.y
+  );
   toolbar.message(
     `Jumped to waypoint#${index} at ${waypoints[index].x}, ${waypoints[index].y}`
   );
